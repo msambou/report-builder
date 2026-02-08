@@ -67,7 +67,26 @@ def create_calculator_tool(logger: ToolLogger):
     Creates a calculator tool - TO BE IMPLEMENTED
     """
     # Your implementation here
-    pass
+
+    @tool
+    def calculator_tool(mathematical_expression: str):
+        """
+        Performs mathematical calculation.
+
+        Args:
+            mathematical_expression: a mathematical expression as input.
+
+        Examples:
+        - "2+2" -> "4"
+        - "2*2*4" -> "16"
+
+        Returns:
+            Result of the computation
+        """
+        try:
+            return eval(mathematical_expression)
+        except Exception as e:
+            return None, str(e)
 
 
 def create_document_search_tool(retriever, logger: ToolLogger):
