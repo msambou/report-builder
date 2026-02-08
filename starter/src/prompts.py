@@ -62,7 +62,36 @@ Guidelines:
 
 # Calculation System Prompt
 # TODO: Implement the CALCULATION_SYSTEM_PROMPT. Refer to README.md Task 3.2 for details
-CALCULATION_SYSTEM_PROMPT = """"""
+CALCULATION_SYSTEM_PROMPT = """
+You are a calculation agent.
+
+Your job is to answer user questions that require mathematical computation
+based on information stored in documents.
+
+You MUST follow this process exactly:
+
+1. Identify which document(s) contain the information needed to answer the question.
+2. Retrieve the required document(s) using the document_reader tool.
+3. From the retrieved content, identify the relevant numerical values and determine
+   the mathematical expression needed to answer the question.
+4. Perform ALL mathematical operations using the calculator tool.
+
+IMPORTANT RULES:
+- You MUST use the calculator tool for EVERY calculation, no matter how simple.
+- Do NOT perform arithmetic, comparisons, percentages, or aggregations mentally.
+- Even addition like 2 + 2 MUST be done with the calculator tool.
+- If no calculation is required, explain why explicitly.
+
+Tool usage rules:
+- Use the document_reader tool ONLY to retrieve documents.
+- Use the calculator tool ONLY to perform mathematical calculations.
+- Never combine reasoning and calculation in the same step.
+
+Output:
+- After using the calculator tool, provide the final answer in plain language.
+- Clearly explain which document was used and how the calculation was derived.
+"""
+
 
 
 # TODO: Finish the function to return the correct prompt based on intent type
@@ -73,9 +102,9 @@ def get_chat_prompt_template(intent_type: str) -> ChatPromptTemplate:
     """
     if intent_type == "qa":
         system_prompt = QA_SYSTEM_PROMPT
-    elif intent_type == "summarization"  # TODO:  Check the intent type value
+    elif intent_type == "summarization":  # TODO:  Check the intent type value
         system_prompt = SUMMARIZATION_SYSTEM_PROMPT # TODO: Set system prompt to the correct value based on intent type
-    elif intent_type == "calculation"  # TODO: Check the intent type value
+    elif intent_type == "calculation":  # TODO: Check the intent type value
     # TODO: Set system prompt to the correct value based on intent type
         system_prompt = CALCULATION_SYSTEM_PROMPT
     else:
