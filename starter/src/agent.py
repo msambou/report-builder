@@ -14,6 +14,7 @@ from schemas import (
     AnswerResponse, SummarizationResponse, CalculationResponse, UpdateMemoryResponse
 )
 from prompts import get_intent_classification_prompt, get_chat_prompt_template, MEMORY_SUMMARY_PROMPT
+from langgraph.checkpoint.memory import InMemorySaver
 
 
 # TODO: The AgentState class is already implemented for you.  Study the
@@ -196,12 +197,13 @@ def calculation_agent(state: AgentState, config: RunnableConfig) -> AgentState:
 
 
 # TODO: Finish implementing the update_memory function. Refer to README.md Task 2.4
-def update_memory(state: AgentState) -> AgentState:
+def update_memory(state: AgentState, config: RunnableConfig) -> AgentState:
     """
     Update conversation memory and record the action.
     """
 
     # TODO: Retrieve the LLM from config
+    llm = config.get("configurable").get("llm")
 
     prompt_with_history = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template(MEMORY_SUMMARY_PROMPT),
@@ -211,46 +213,61 @@ def update_memory(state: AgentState) -> AgentState:
     })
 
     structured_llm = llm.with_structured_output(
-        # TODO Pass in the correct schema from scheams.py to extract conversation summary, active documents
+        UpdateMemoryResponse
     )
 
     response = structured_llm.invoke(prompt_with_history)
     return {
-        "conversation_summary":  # TODO: Extract summary from response
-            "active_documents":  # TODO: Update with the current active documents
-    "next_step":  # TODO: Update the next step to end
+        "conversation_summary": response["summary"],  # TODO: Extract summary from response
+        "active_documents": response["document_ids"],  # TODO: Update with the current active documents
+        "next_step": "end"  # TODO: Update the next step to end
     }
 
-    def should_continue(state: AgentState) -> str:
-        """Router function"""
-        return state.get("next_step", "end")
+def should_continue(state: AgentState) -> str:
+    """Router function"""
+    return state.get("next_step", "end")
 
-    # TODO: Complete the create_workflow function. Refer to README.md Task 2.5
-    def create_workflow(llm, tools):
-        """
-        Creates the LangGraph agents.
-        Compiles the workflow with an InMemorySaver checkpointer to persist state.
-        """
-        workflow = StateGraph(AgentState)
+# TODO: Complete the create_workflow function. Refer to README.md Task 2.5
+def create_workflow(llm, tools):
+    """
+    Creates the LangGraph agents.
+    Compiles the workflow with an InMemorySaver checkpointer to persist state.
+    """
+    workflow = StateGraph(AgentState)
 
-        # TODO: Add all the nodes to the workflow by calling workflow.add_node(...)
+    # TODO: Add all the nodes to the workflow by calling workflow.add_node(...)
+    workflow.add_node("classify_intent", classify_intent)
+    workflow.add_node("qa_agent", qa_agent)
+    workflow.add_node("summarization_agent", summarization_agent)
+    workflow.add_node("calculation_agent", calculation_agent)
+    workflow.add_node("update_memory", update_memory)
+    
 
-        workflow.set_entry_point("classify_intent")
-        workflow.add_conditional_edges(
-            "classify_intent",
-            should_continue,
-            {
-                # TODO: Map the intent strings to the correct node names
-                "end": END
-            }
-        )
+    workflow.set_entry_point("classify_intent")
+    workflow.add_conditional_edges(
+        "classify_intent",
+        should_continue,
+        {
+            # TODO: Map the intent strings to the correct node names
+            "qa": "qa_agent",
+            "summarization": "summarization_agent",
+            "calculation": "calculation_agent",
+            "end": END
+        }
+    )
 
-        # TODO: For each node add an edge that connects it to the update_memory node
-        # qa_agent -> update_memory
-        # summarization_agent -> update_memory
-        # calculation_agent -> update_memory
+    # TODO: For each node add an edge that connects it to the update_memory node
+    # qa_agent -> update_memory
+    # summarization_agent -> update_memory
+    # calculation_agent -> update_memory
 
-        workflow.add_edge("update_memory", END)
+    workflow.add_edge("classify_intent", update_memory)
+    workflow.add_edge("qa_agent", update_memory)
+    workflow.add_edge("summarization_agent", update_memory)
+    workflow.add_edge("calculation_agent", update_memory)
 
-        # TODO Modify the return values below by adding a checkpointer with InMemorySaver
-        return workflow.compile()
+    workflow.add_edge("update_memory", END)
+
+    # TODO Modify the return values below by adding a checkpointer with InMemorySaver
+    memory = InMemorySaver()
+    return workflow.compile(checkpointer=memory)

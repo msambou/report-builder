@@ -1,27 +1,53 @@
-Prior Knowledge:
-- Students already know Poetry
+# README Template
 
-Demo: 
-Using the solution from the recitation on P0,
-- Start by adding dependencies - pydantic, pytest, etc
-- Refactor the code to use FastAPI
-- Explain what Pydantic models are and how they’re helpful for validating user requests
-- Add a validator for a particular input parameter: for eg. Age
-    - If age > 18 then do….
-    - You understand the recitation best, so do what’s best in your opinion
-- Create unit tests
-- Walk them through how unit tests are added
-- Mock API responses. Remember in the project, there’s a part where they had to mock the LLM service response.
-- How to ruff for formatting
+Below is a template provided for use when building your README file for students.
 
-NB:
-Don’t bother about the CI/CD part. That’s fairly easy
-I want you to rather direct your efforts into refactoring, Pydantic models, testing as these are the areas I foresee them to struggle. They already have a good foundation of GitHub Actions.
+# Project Title
 
-Kahoot
-The Kahoot should cover the following areas:
-- A question about the need for refactoring
-- What decorator do you use when writing a validator function?
-- A question about mocking an API response. 
-- A question about the difference between unit and integration tests
-- A question about formatting tools, eg. Ruff
+Project description goes here.
+
+## Getting Started
+
+Instructions for how to get a copy of the project running on your local machine.
+
+### Dependencies
+
+```
+Examples here
+```
+
+### Installation
+
+Step by step explanation of how to get a dev environment running.
+
+List out the steps
+
+```
+Give an example here
+```
+
+## Testing
+
+Explain the steps needed to run any automated tests
+
+### Break Down Tests
+
+Explain what each test does and why
+
+```
+Examples here
+```
+## Project Instructions
+
+This section should contain all the student deliverables for this project.
+
+## Built With
+
+* [Item1](www.item1.com) - Description of item
+* [Item2](www.item2.com) - Description of item
+* [Item3](www.item3.com) - Description of item
+
+Include all items used to build project.
+
+## License
+[License](../LICENSE.md)
