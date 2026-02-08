@@ -17,7 +17,11 @@ class DocumentChunk(BaseModel):
 # Refer to README.md Task 1.1 for detailed field requirements.
 class AnswerResponse(BaseModel):
     """Structured response for Q&A tasks - TO BE IMPLEMENTED"""
-    pass
+    question: str
+    answer: str
+    sources: List[str]
+    confidence: float
+    timestamp: datetime
 
 
 
@@ -50,7 +54,10 @@ class UpdateMemoryResponse(BaseModel):
 # Refer to README.md Task 1.2 for detailed field requirements.
 class UserIntent(BaseModel):
     """User intent classification - TO BE IMPLEMENTED"""
-    pass
+    intent_type: Literal["qa", "summarization", "calculation", "unknown"]
+    confidence: int
+    reasoning: str
+
 
 
 class SessionState(BaseModel):

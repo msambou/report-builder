@@ -45,7 +45,7 @@ class AgentState(TypedDict):
     user_id: Optional[str]
 
     # TODO: Modify actions_taken to use an operator.add reducer
-    actions_taken: Annotated[List[str]]
+    actions_taken: Annotated[List[str], operator.add]
 
 
 def invoke_react_agent(response_schema: type[BaseModel], messages: List[BaseMessage], llm, tools) -> (
@@ -79,16 +79,41 @@ def classify_intent(state: AgentState, config: RunnableConfig) -> AgentState:
     history = state.get("messages", [])
 
     # TODO Configure the llm chat model for structured output
+    user_input = state.get('user_input', '')
+    parser = llm.with_structured_output(UserIntent)
 
     # TODO Create a formatted prompt with conversation history and user input
+    prompt = get_intent_classification_prompt()
+    
+    chain = prompt | parser
+
+    response = chain.invoke({
+        "user_input": user_input,
+        "conversation_history": history
+    })
 
     next_step = "qa"
+    intent = ""
 
     # TODO: Add conditional logic to set next_step based on intent
+    if isinstance(response, UserIntent):
+        intent = response["intent_type"]
+
+        if intent == "qa":
+            next_step = "qa_agent"
+        elif intent == "summarization":
+            next_step = "summarization_agent"
+        elif intent == "calculation":
+            next_step = "calculation_agent"
+        else:
+            next_step = "qa_agent"
+
 
     return {
         "actions_taken": ["classify_intent"],
         # TODO: Update state intent and next_step
+        intent: intent,
+        next_step: next_step
     }
 
 
