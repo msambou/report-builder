@@ -157,6 +157,7 @@ class DocumentAssistant:
                         final_state["active_documents"]
                     ))
                 self._save_session()
+            print("***********final state: ***********", final_state.get("intent"))
             return {
                 "success": True,
                 "response": final_state.get("messages")[-1].content if final_state.get("messages") else None,

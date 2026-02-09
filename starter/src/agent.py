@@ -96,25 +96,29 @@ def classify_intent(state: AgentState, config: RunnableConfig) -> AgentState:
     next_step = "qa"
     intent = ""
 
+    # print("-------------response-------------", response)
     # TODO: Add conditional logic to set next_step based on intent
     if isinstance(response, UserIntent):
-        intent = response["intent_type"]
+        print("------is intent-------")
+        intent = response.intent_type
 
         if intent == "qa":
-            next_step = "qa_agent"
+            next_step = "qa"
         elif intent == "summarization":
-            next_step = "summarization_agent"
+            next_step = "summarization"
         elif intent == "calculation":
-            next_step = "calculation_agent"
+            next_step = "calculation"
         else:
-            next_step = "qa_agent"
+            next_step = "qa"
 
+    print("next step: ", next_step)
+    print("intent for classify func: ", intent)
 
     return {
         "actions_taken": ["classify_intent"],
         # TODO: Update state intent and next_step
-        intent: intent,
-        next_step: next_step
+        "intent": response,
+        "next_step": next_step
     }
 
 
@@ -122,6 +126,8 @@ def qa_agent(state: AgentState, config: RunnableConfig) -> AgentState:
     """
     Handle Q&A tasks and record the action.
     """
+
+    print("in qa agent. next step is ", state.get('next_step', "None"))
     llm = config.get("configurable").get("llm")
     tools = config.get("configurable").get("tools")
 
@@ -174,7 +180,7 @@ def calculation_agent(state: AgentState, config: RunnableConfig) -> AgentState:
     """
     Handle calculation tasks and record the action.
     """
-
+    print("in calculation_agent. next step is ", state.get('next_step', "None"))
     llm = config.get("configurable").get("llm")
     tools = config.get("configurable").get("tools")
 
@@ -201,7 +207,7 @@ def update_memory(state: AgentState, config: RunnableConfig) -> AgentState:
     """
     Update conversation memory and record the action.
     """
-
+    print("--------in update memory. Next step is-----------", state.get('next_step', "None"))
     # TODO: Retrieve the LLM from config
     llm = config.get("configurable").get("llm")
 
@@ -217,14 +223,20 @@ def update_memory(state: AgentState, config: RunnableConfig) -> AgentState:
     )
 
     response = structured_llm.invoke(prompt_with_history)
+    print(response.document_ids)
+    print("--------done updating memory--------------")
+
+    active_documents = state.get('active_documents', [])
     return {
-        "conversation_summary": response["summary"],  # TODO: Extract summary from response
-        "active_documents": response["document_ids"],  # TODO: Update with the current active documents
+        "conversation_summary": response.summary,  # TODO: Extract summary from response
+        "active_documents": active_documents + response.document_ids,  # TODO: Update with the current active documents
         "next_step": "end"  # TODO: Update the next step to end
     }
 
 def should_continue(state: AgentState) -> str:
     """Router function"""
+    print("---------in should continue--------")
+    print(state.get('next_step'))
     return state.get("next_step", "end")
 
 # TODO: Complete the create_workflow function. Refer to README.md Task 2.5
@@ -241,7 +253,6 @@ def create_workflow(llm, tools):
     workflow.add_node("summarization_agent", summarization_agent)
     workflow.add_node("calculation_agent", calculation_agent)
     workflow.add_node("update_memory", update_memory)
-    
 
     workflow.set_entry_point("classify_intent")
     workflow.add_conditional_edges(
@@ -261,10 +272,10 @@ def create_workflow(llm, tools):
     # summarization_agent -> update_memory
     # calculation_agent -> update_memory
 
-    workflow.add_edge("classify_intent", update_memory)
-    workflow.add_edge("qa_agent", update_memory)
-    workflow.add_edge("summarization_agent", update_memory)
-    workflow.add_edge("calculation_agent", update_memory)
+    # workflow.add_edge("classify_intent", "update_memory")
+    workflow.add_edge("qa_agent", "update_memory")
+    workflow.add_edge("summarization_agent", "update_memory")
+    workflow.add_edge("calculation_agent", "update_memory")
 
     workflow.add_edge("update_memory", END)
 

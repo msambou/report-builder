@@ -69,7 +69,7 @@ def create_calculator_tool(logger: ToolLogger):
     # Your implementation here
 
     @tool
-    def calculator_tool(mathematical_expression: str):
+    def calculator_tool(mathematical_expression: str) -> dict:
         """
         Performs mathematical calculation.
 
@@ -83,11 +83,25 @@ def create_calculator_tool(logger: ToolLogger):
         Returns:
             Result of the computation
         """
+        print("************ expression **************", mathematical_expression)
         try:
-            return eval(mathematical_expression)
+            value = eval(mathematical_expression)
+            return {
+                "expression": mathematical_expression,
+                "result": value,
+                "explanation": f"Evaluated the expression `{mathematical_expression}` to get {value}.",
+                "units": None,
+                "timestamp": datetime.now(),
+            }
         except Exception as e:
-            return None, str(e)
-
+            return {
+                "expression": mathematical_expression,
+                "result": float("nan"),
+                "explanation": f"Could not evaluate `{mathematical_expression}`. Error: {e}",
+                "units": None,
+                "timestamp": datetime.now(),
+            }
+    return calculator_tool
 
 def create_document_search_tool(retriever, logger: ToolLogger):
     """
