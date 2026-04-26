@@ -99,7 +99,7 @@ def classify_intent(state: AgentState, config: RunnableConfig) -> AgentState:
     # print("-------------response-------------", response)
     # TODO: Add conditional logic to set next_step based on intent
     if isinstance(response, UserIntent):
-        print("------is intent-------")
+        # print("------is intent-------")
         intent = response.intent_type
 
         if intent == "qa":
@@ -111,8 +111,8 @@ def classify_intent(state: AgentState, config: RunnableConfig) -> AgentState:
         else:
             next_step = "qa"
 
-    print("next step: ", next_step)
-    print("intent for classify func: ", intent)
+    # print("next step: ", next_step)
+    # print("intent for classify func: ", intent)
 
     return {
         "actions_taken": ["classify_intent"],
@@ -127,7 +127,7 @@ def qa_agent(state: AgentState, config: RunnableConfig) -> AgentState:
     Handle Q&A tasks and record the action.
     """
 
-    print("in qa agent. next step is ", state.get('next_step', "None"))
+    # print("in qa agent. next step is ", state.get('next_step', "None"))
     llm = config.get("configurable").get("llm")
     tools = config.get("configurable").get("tools")
 
@@ -139,6 +139,7 @@ def qa_agent(state: AgentState, config: RunnableConfig) -> AgentState:
     }).to_messages()
 
     result, tools_used = invoke_react_agent(AnswerResponse, messages, llm, tools)
+
 
     return {
         "messages": result.get("messages", []),
@@ -180,7 +181,7 @@ def calculation_agent(state: AgentState, config: RunnableConfig) -> AgentState:
     """
     Handle calculation tasks and record the action.
     """
-    print("in calculation_agent. next step is ", state.get('next_step', "None"))
+    # print("in calculation_agent. next step is ", state.get('next_step', "None"))
     llm = config.get("configurable").get("llm")
     tools = config.get("configurable").get("tools")
 
@@ -192,6 +193,8 @@ def calculation_agent(state: AgentState, config: RunnableConfig) -> AgentState:
     }).to_messages()
 
     result, tools_used = invoke_react_agent(AnswerResponse, messages, llm, tools)
+
+    print(result)
 
     return {
         "messages": result.get("messages", []),
@@ -207,9 +210,13 @@ def update_memory(state: AgentState, config: RunnableConfig) -> AgentState:
     """
     Update conversation memory and record the action.
     """
-    print("--------in update memory. Next step is-----------", state.get('next_step', "None"))
+    # print("--------in update memory. Next step is-----------", state.get('next_step', "None"))
     # TODO: Retrieve the LLM from config
     llm = config.get("configurable").get("llm")
+
+    print("---------showing updated intent from update_memory--------------------")
+    print(state.get('intent'))
+    print("---------showing updated intent from update_memory--------------------")
 
     prompt_with_history = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template(MEMORY_SUMMARY_PROMPT),
@@ -223,8 +230,8 @@ def update_memory(state: AgentState, config: RunnableConfig) -> AgentState:
     )
 
     response = structured_llm.invoke(prompt_with_history)
-    print(response.document_ids)
-    print("--------done updating memory--------------")
+    # print(response.document_ids)
+    # print("--------done updating memory--------------")
 
     active_documents = state.get('active_documents', [])
     return {
@@ -235,8 +242,8 @@ def update_memory(state: AgentState, config: RunnableConfig) -> AgentState:
 
 def should_continue(state: AgentState) -> str:
     """Router function"""
-    print("---------in should continue--------")
-    print(state.get('next_step'))
+    # print("---------in should continue--------")
+    # print(state.get('next_step'))
     return state.get("next_step", "end")
 
 # TODO: Complete the create_workflow function. Refer to README.md Task 2.5

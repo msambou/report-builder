@@ -83,7 +83,7 @@ def create_calculator_tool(logger: ToolLogger):
         Returns:
             Result of the computation
         """
-        print("************ expression **************", mathematical_expression)
+        # print("************ expression **************", mathematical_expression)
         try:
             value = eval(mathematical_expression)
             return {
