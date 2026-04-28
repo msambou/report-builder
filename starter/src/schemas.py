@@ -19,9 +19,9 @@ class AnswerResponse(BaseModel):
     """Structured response for Q&A tasks - TO BE IMPLEMENTED"""
     question: str
     answer: str
-    sources: List[str]
-    confidence: float
-    timestamp: datetime
+    sources: List[str] = Field(default_factory=list, description="List of source document IDs")
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0, description="Confidence score between 0 and 1")
+    timestamp: datetime = Field(default_factory=datetime.now)
 
 
 
@@ -55,7 +55,7 @@ class UpdateMemoryResponse(BaseModel):
 class UserIntent(BaseModel):
     """User intent classification - TO BE IMPLEMENTED"""
     intent_type: Literal["qa", "summarization", "calculation", "unknown"]
-    confidence: int
+    confidence: float = Field(ge=0.0, le=1.0, description="Confidence score between 0 and 1")
     reasoning: str
 
 

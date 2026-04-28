@@ -14,17 +14,38 @@ def get_intent_classification_prompt() -> PromptTemplate:
         template="""You are an intent classifier for a document processing assistant.
 
 Given the user input and conversation history, classify the user's intent into one of these categories:
-- qa: Questions about documents or records that do not require calculations.
-- summarization: Requests to summarize or extract key points from documents that do not require calculations.
-- calculation: Mathematical operations or numerical computations. Or questions about documents that may require calculations
-- unknown: Cannot determine the intent clearly
+
+- qa: The user wants a factual answer from a document. No arithmetic is needed to answer.
+- summarization: The user wants a summary or key points extracted from one or more documents. No arithmetic is needed.
+- calculation: The user needs a numeric result that requires arithmetic (addition, subtraction, multiplication, division, percentages, totals, averages, differences). The question cannot be answered by simply reading a number off the document.
+- unknown: The intent cannot be determined clearly.
+
+IMPORTANT BOUNDARY — qa vs calculation:
+Use "qa" when the answer is a value that already exists in the document (e.g. "What is the payment terms?" or "What is the total on invoice INV-001?").
+Use "calculation" only when the answer requires combining or computing multiple values (e.g. "What is the sum of all invoice totals?" or "What is the difference between the contract value and the claim amount?").
+
+Examples:
+1. "What is the client name on invoice INV-002?" → qa
+   (The answer is a named field — no arithmetic needed.)
+
+2. "Summarize all contracts" → summarization
+   (The user wants key points extracted, not a specific answer or a computation.)
+
+3. "What is the total of all invoices combined?" → calculation
+   (Requires adding the totals from multiple documents — arithmetic is necessary.)
+
+4. "What is the total on invoice INV-001?" → qa
+   (The total is a single value already printed on the document. Reading it is not arithmetic.)
+
+5. "How much more is INV-003 compared to INV-001?" → calculation
+   (Requires subtracting one value from another — arithmetic is necessary.)
 
 User Input: {user_input}
 
 Recent Conversation History:
 {conversation_history}
 
-Analyze the user's request and classify their intent with a confidence score and brief reasoning.
+Classify the intent with a confidence score between 0 and 1 and brief reasoning.
 """
     )
 

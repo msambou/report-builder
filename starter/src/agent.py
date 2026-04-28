@@ -165,7 +165,7 @@ def summarization_agent(state: AgentState, config: RunnableConfig) -> AgentState
         "chat_history": state.get("messages", []),
     }).to_messages()
 
-    result, tools_used = invoke_react_agent(AnswerResponse, messages, llm, tools)
+    result, tools_used = invoke_react_agent(SummarizationResponse, messages, llm, tools)
 
     return {
         "messages": result.get("messages", []),
@@ -192,9 +192,9 @@ def calculation_agent(state: AgentState, config: RunnableConfig) -> AgentState:
         "chat_history": state.get("messages", []),
     }).to_messages()
 
-    result, tools_used = invoke_react_agent(AnswerResponse, messages, llm, tools)
+    result, tools_used = invoke_react_agent(CalculationResponse, messages, llm, tools)
 
-    print(result)
+    # print(result)
 
     return {
         "messages": result.get("messages", []),
@@ -214,9 +214,9 @@ def update_memory(state: AgentState, config: RunnableConfig) -> AgentState:
     # TODO: Retrieve the LLM from config
     llm = config.get("configurable").get("llm")
 
-    print("---------showing updated intent from update_memory--------------------")
-    print(state.get('intent'))
-    print("---------showing updated intent from update_memory--------------------")
+    # print("---------showing updated intent from update_memory--------------------")
+    # print(state.get('intent'))
+    # print("---------showing updated intent from update_memory--------------------")
 
     prompt_with_history = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template(MEMORY_SUMMARY_PROMPT),

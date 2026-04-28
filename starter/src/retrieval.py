@@ -42,11 +42,12 @@ class SimulatedRetriever:
 
                 Subtotal: $20,000
                 Tax (10%): $2,000
+                Total Due: $22,000
 
                 Payment Terms: Net 30 days
                 """,
                 doc_type="invoice",
-                metadata={"client": "Acme Corporation", "date": "2024-01-15"}
+                metadata={"total": 22000, "client": "Acme Corporation", "date": "2024-01-15"}
             ),
             Document(
                 doc_id="CON-001",

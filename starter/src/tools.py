@@ -67,9 +67,8 @@ def create_calculator_tool(logger: ToolLogger):
     Creates a calculator tool - TO BE IMPLEMENTED
     """
     # Your implementation here
-
     @tool
-    def calculator_tool(mathematical_expression: str) -> dict:
+    def calculator_tool(mathematical_expression: str) -> str:
         """
         Performs mathematical calculation.
 
@@ -77,30 +76,29 @@ def create_calculator_tool(logger: ToolLogger):
             mathematical_expression: a mathematical expression as input.
 
         Examples:
-        - "2+2" -> "4"
-        - "2*2*4" -> "16"
+        - "2+2" -> "Result: 4"
+        - "2*2*4" -> "Result: 16"
 
         Returns:
-            Result of the computation
+            Result of the computation as a string
         """
-        # print("************ expression **************", mathematical_expression)
+        if not re.match(r'^[\d\s\+\-\*\/\.\(\)\%\^]+$', mathematical_expression):
+            result_str = f"Error: Unsafe expression rejected: `{mathematical_expression}`."
+            logger.log_tool_use("calculator_tool", {"expression": mathematical_expression}, {"error": result_str})
+            return result_str
         try:
             value = eval(mathematical_expression)
-            return {
-                "expression": mathematical_expression,
-                "result": value,
-                "explanation": f"Evaluated the expression `{mathematical_expression}` to get {value}.",
-                "units": None,
-                "timestamp": datetime.now(),
-            }
+            result_str = f"Result: {value} (expression: {mathematical_expression})"
+            logger.log_tool_use(
+                "calculator_tool",
+                {"expression": mathematical_expression},
+                {"expression": mathematical_expression, "result": value, "explanation": f"Evaluated `{mathematical_expression}` to get {value}."}
+            )
+            return result_str
         except Exception as e:
-            return {
-                "expression": mathematical_expression,
-                "result": float("nan"),
-                "explanation": f"Could not evaluate `{mathematical_expression}`. Error: {e}",
-                "units": None,
-                "timestamp": datetime.now(),
-            }
+            result_str = f"Error: Could not evaluate `{mathematical_expression}`. {e}"
+            logger.log_tool_use("calculator_tool", {"expression": mathematical_expression}, {"error": result_str})
+        return result_str
     return calculator_tool
 
 def create_document_search_tool(retriever, logger: ToolLogger):
